@@ -1,6 +1,6 @@
 # corona
 
-A new Flutter project.
+A new Flutter project to monitor COVID-19 Spread.
 
 ## Getting Started
 

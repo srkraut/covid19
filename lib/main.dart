@@ -1,7 +1,8 @@
 import 'package:corona/Models/brief.dart';
-
+import 'package:corona/util/indicator.dart';
+import 'package:corona/util/showingsection.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
 import 'Network/server.dart';
 
 void main() => runApp(MyApp());
@@ -27,6 +28,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int touchedIndex;
   @override
   void initState() {
     super.initState();
@@ -53,11 +55,83 @@ class _MyHomePageState extends State<MyHomePage> {
           key: _refreshIndicatorKey,
           onRefresh: _refresh,
           child: ListView(children: [
-            // body of above
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(children: <Widget>[
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: Card(
+                    child: Row(
+                      children: <Widget>[
+                        const SizedBox(
+                          height: 18,
+                        ),
+                        Expanded(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: PieChart(
+                              PieChartData(
+                                  pieTouchData: PieTouchData(
+                                      touchCallback: (pieTouchResponse) {
+                                    setState(() {
+                                      if (pieTouchResponse.touchInput
+                                              is FlLongPressEnd ||
+                                          pieTouchResponse.touchInput
+                                              is FlPanEnd) {
+                                        touchedIndex = -1;
+                                      } else {
+                                        touchedIndex = pieTouchResponse
+                                            .touchedSectionIndex;
+                                      }
+                                    });
+                                  }),
+                                  borderData: FlBorderData(
+                                    show: false,
+                                  ),
+                                  sectionsSpace: 0,
+                                  centerSpaceRadius: 40,
+                                  sections: showingSections(_brief)),
+                            ),
+                          ),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const <Widget>[
+                            Indicator(
+                              color: Colors.blue,
+                              text: 'Confirmed',
+                              isSquare: true,
+                            ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            Indicator(
+                              color: Colors.green,
+                              text: 'Recovered',
+                              isSquare: true,
+                            ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                            Indicator(
+                              color: Colors.red,
+                              text: 'Deaths',
+                              isSquare: true,
+                            ),
+                            SizedBox(
+                              height: 18,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          width: 28,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 //Confirmed
                 Confirmed(brief: _brief),
                 //Recovered
@@ -83,6 +157,7 @@ class Rate extends StatelessWidget {
         super(key: key);
 
   final Brief _brief;
+
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +253,8 @@ class Recovered extends StatelessWidget {
     );
   }
 }
+
+
 
 class Confirmed extends StatelessWidget {
   const Confirmed({
